@@ -6,15 +6,17 @@ class Timer extends React.Component {
     this.state = {
       isSession: true,
       timerSecond: 0,
-      intervalId:0
+      intervalId: 0,
     };
-    this.play = this.play.bind(this);
+    this.playTimer = this.playTimer.bind(this);
     this.decreaseTimer = this.decreaseTimer.bind(this);
+    this.stopTimer = this.stopTimer.bind(this);
+    this.resetTimer = this.resetTimer.bind(this);
   }
 
-  play() {
+  playTimer() {
     let intervalId = setInterval(this.decreaseTimer, 1000);
-
+    this.props.onPlayStopTimer(true);
     this.setState({
       intervalId: intervalId,
     });
@@ -23,10 +25,25 @@ class Timer extends React.Component {
   decreaseTimer() {
     switch (this.state.timerSecond) {
       case 0:
-        this.props.updateTimerMinute();
-        this.setState({
-          timerSecond: 59,
-        });
+        if (this.props.timerMinute === 0) {
+          if (this.state.isSession) {
+            this.setState({
+              isSession: false,
+            });
+            this.props.toggleInterval(this.state.isSession);
+          } else {
+            this.setState({
+              isSession: true,
+            });
+            this.props.toggleInterval(this.state.isSession);
+          }
+        } else {
+          this.props.updateTimerMinute();
+          this.setState({
+            timerSecond: 59,
+          });
+        }
+
         break;
       default:
         this.setState((prevState) => {
@@ -36,6 +53,21 @@ class Timer extends React.Component {
         });
         break;
     }
+  }
+
+  stopTimer() {
+    clearInterval(this.state.intervalId);
+    this.props.onPlayStopTimer(false);
+  }
+
+  resetTimer() {
+    this.stopTimer();
+    this.props.resetTimer();
+    this.props.onPlayStopTimer(false);
+    this.setState({
+      timerSecond: 0,
+      isSession:true
+    });
   }
 
   render() {
@@ -55,9 +87,9 @@ class Timer extends React.Component {
           </span>
         </section>
         <section className="timer-actions">
-          <button onClick={this.play}>Play</button>
-          <button onClick={this.stop}>Stop</button>
-          <button onClick={this.refresh}>Refresh</button>
+          <button disabled={this.props.isPlay === true ? "disabled" : ""} onClick={this.playTimer}>Play</button>
+          <button disabled={this.props.isPlay === false ? "disabled" : ""} onClick={this.stopTimer}>Stop</button>
+          <button onClick={this.resetTimer}>Refresh</button>
         </section>
       </section>
     );

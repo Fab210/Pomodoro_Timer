@@ -43,6 +43,10 @@ button {
     border-radius: 2px;
 }
 
+button:disabled{
+    cursor: not-allowed;
+}
+
 .interval-length{
     font-size: 2rem;
     margin: 0 10px;
